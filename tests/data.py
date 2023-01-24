@@ -388,11 +388,11 @@ getOrderError6 = lambda : {
 getOrder0 = lambda : {
     "requests": [
         {
-            "id"      : "Product0",
+            "id"      : "Product0", ############################bilo je product 0
             "quantity": 2
         },
         {
-            "id"      : "Product1",
+            "id"      : "Product1",############################bilo je product 1
             "quantity": 3
         }
     ]

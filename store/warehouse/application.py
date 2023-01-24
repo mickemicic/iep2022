@@ -23,6 +23,7 @@ jwt = JWTManager(application)
 def updateStore():
     # con = request.files["file"].stream.read().decode("utf-8")
     con = request.files.get("file", None)
+
     if con:
         stream = io.StringIO(con.stream.read().decode("utf-8"))
         reader = csv.reader(stream)
@@ -62,8 +63,8 @@ def updateStore():
             currProduct = categories + "," + title + "," + str(quantity) + "," + str(price)
             currProducts.append(currProduct)
 
-        with Redis(host=Configuration.REDIS_HOST) as redis:
-            for p in currProducts:
+        for p in currProducts:
+            with Redis(host=Configuration.REDIS_HOST) as redis:
                 redis.rpush(Configuration.REDIS_PRODUCT_LIST, p)
         return Response(status=200)
     else:

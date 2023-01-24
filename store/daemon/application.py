@@ -14,8 +14,8 @@ jwt = JWTManager(application)
 if __name__ == "__main__":
     database.init_app(application)
 
-    with Redis(host=Configuration.REDIS_HOST) as redis:
-        while 1:
+    while True:
+        with Redis(host=Configuration.REDIS_HOST) as redis:
             with application.app_context() as context:
                 entryRow = redis.blpop(Configuration.REDIS_PRODUCT_LIST)[1].decode("utf-8")
                 entry = entryRow.split(",")
@@ -28,23 +28,34 @@ if __name__ == "__main__":
                 currProduct = Product.query.filter(Product.title == productTitle).first()
 
                 if currProduct is not None:
-                    # product exists, check if pending orders
+                    # product exists, check categories and then if pending orders
                     catsName = []
-                    for category in productCategories:
-                        cat = Category.query.filter(Category.name == category).first()
-                        if cat:
-                            catsName.append(cat.name)
+                    for cat in currProduct.categories:
+                        if currProduct.id == 3:
+                            print("Kategorija iz proizvoda: "+cat.name+"\n")
+                        catsName.append(cat.name)
 
-                    if collections.Counter(productCategories) == collections.Counter(catsName):
+                    if currProduct.id == 3:
+                        for c in productCategories:
+                            print("OVO Kategorija iz csv: " + c + "\n")
+
+                    if set(productCategories) == set(catsName):
                         price = \
                             (currProduct.quantity * currProduct.askingPrice + productQuantity * productPrice) \
                             / (currProduct.quantity + productQuantity)
+                        if currProduct.id == 3:
+                            print("nova cena: " + str(price)+"\n")
                         currProduct.quantity = currProduct.quantity + productQuantity
-
+                        if currProduct.id == 3:
+                            print("nova kolicina: " + str(currProduct.quantity)+"\n")
+                        database.session.commit()
                         currProduct.askingPrice = price
+                        if currProduct.id == 3:
+                            print("A OVO: "+str(currProduct.askingPrice)+" hehe "+str(currProduct.quantity))
                         database.session.commit()
-                        database.session.commit()
-
+                    else:
+                        if currProduct.id == 3:
+                            print("NISU ISTE BRE")
                     productOrders = OrderProduct.query.filter(and_(OrderProduct.productId == currProduct.id,
                                                                    OrderProduct.received != OrderProduct.requested
                                                                    )).all()

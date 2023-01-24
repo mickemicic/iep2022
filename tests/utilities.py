@@ -177,7 +177,7 @@ def setUpUpdateTest ( withAuthentication, authenticationAddress, lines ):
 
 def updateTestEquals ( setUpData, expectedResponse, receivedResponse ):
     equals ( setUpData, expectedResponse, receivedResponse );
-    time.sleep ( 1 );
+    time.sleep ( 1 ); #####################################################################################################3
 
 def setUpSearchTest ( withAuthentication, authenticationAddress, parameters ):
     def setUpdateErrorTestImplementation ( url, headers, data, files ):
@@ -368,7 +368,7 @@ def evaluateOrderTest ( setUpData, expectedResponse, receivedResponse ):
     assert type ( receivedResponse["id"] ) is int, "ID must an integer greater than or equal to 0."
     assert int ( receivedResponse["id"] ) >= 0, "ID must an integer greater than or equal to 0."
 
-    time.sleep ( 1 );
+    time.sleep ( 1 ); ##############################################################################################################
 
 def runTests ( tests ):
     max   = 0;

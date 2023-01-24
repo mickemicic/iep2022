@@ -1,11 +1,13 @@
+import json
 from datetime import datetime
 
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+from sqlalchemy import and_
 
 from store.admin.adminDecorator import roleCheck
 from store.configuration import Configuration
-from store.models import database, Product, Category, Order, OrderProduct
+from store.models import database, Product, Category, Order, OrderProduct, ProductCategory
 
 application = Flask(__name__)
 application.config.from_object(Configuration)
@@ -29,6 +31,14 @@ def search():
     idHelper = []
 
     # imam sve kategorije sa imenom category, i sve proizvode sa imenom name
+
+    # products = Product.query.join(ProductCategory).join(Category).filter(
+    #     and_(Category.name.contains(categoryName), Product.title.contains(product)))
+
+    # for p in products:
+    #     print(p.title +" - ime, " +" \n")
+    #     for c in p.categories:
+    #         print("-------------" + c.name + " - kategorija " + "\n")
 
     for p in pro:
         catArr = []
@@ -59,9 +69,6 @@ def search():
     # for p in pro:
     #     print(p.title + " - ")
 
-
-
-
     # for p in pro:
     #     print("proizvod:" + p.title + '\n')
     # for p in pro:
@@ -91,7 +98,6 @@ def search():
     #     if flag and c.name not in categoryList:
     #         categoryList.append(c.name)
 
-
     # for c in cat:
     #     for p in pro:
     #         if c in p.categories and not c.name in arrCategory:
@@ -112,15 +118,17 @@ def search():
     #                 productList.append(pomPro)
 
 
-
-
 @application.route("/order", methods=["POST"])
 @jwt_required()
 @roleCheck("customer")
 def order():
-
     try:
-        requests = request.json.get("requests", "")
+        requests = request.json.get("requests")
+
+        # conStr = json.loads(requests)
+        # if "requests" not in conStr:
+        #     return jsonify({"message": "Field requests is missing."}), 400
+
         for idReq, req in enumerate(requests):
             if req.get("id") is None:
                 return jsonify({"message": "Product id is missing for request number " + str(idReq) + "."}), 400
@@ -157,18 +165,20 @@ def order():
                                      requested=req["quantity"])
             totalPrice = totalPrice + pro.askingPrice * req["quantity"]
 
+            database.session.add(newOrdPro)
+
+            database.session.commit()
+
         newOrd.price = totalPrice
+        database.session.commit()
 
         if flag:
             newOrd.status = "COMPLETE"
-
-        database.session.add(newOrdPro)
-
-        database.session.commit()
+            database.session.commit()
 
         return jsonify({"id": newOrd.id}), 200
 
-    except UnboundLocalError:
+    except (UnboundLocalError, AttributeError, TypeError):
         return jsonify({"message": "Field requests is missing."}), 400
 
 
@@ -177,7 +187,7 @@ def order():
 @roleCheck("customer")
 def status():
     email = get_jwt_identity()
-    orders = Order.query.filter(Order.buyer == email)
+    orders = Order.query.filter(Order.buyer == email).all()
 
     ordersList = []
 
