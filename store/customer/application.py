@@ -1,13 +1,15 @@
-import json
 from datetime import datetime
 
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
-from sqlalchemy import and_
 
-from store.admin.adminDecorator import roleCheck
-from store.configuration import Configuration
-from store.models import database, Product, Category, Order, OrderProduct, ProductCategory
+from roleDecorator import roleCheck
+from configuration import Configuration
+from models import database, Product, Category, Order, OrderProduct
+
+# from store.roleDecorator import roleCheck
+# from store.configuration import Configuration
+# from store.models import database, Product, Category, Order, OrderProduct
 
 application = Flask(__name__)
 application.config.from_object(Configuration)
@@ -216,13 +218,12 @@ def status():
     return jsonify({"orders": ordersList}), 200
 
 
-#
-# @application.route("/brm", methods=["GET"])
-# @jwt_required()
-# @roleCheck("customer")
-# def index():
-#     return "RADI!"
-#
+@application.route("/", methods=["GET"])
+@jwt_required()
+@roleCheck("customer")
+def index():
+    return "customer RADI!"
+
 
 if __name__ == "__main__":
     database.init_app(application)

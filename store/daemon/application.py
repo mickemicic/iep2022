@@ -1,11 +1,13 @@
-import collections
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from redis.client import Redis
 from sqlalchemy import and_
 
-from store.configuration import Configuration
-from store.models import database, Product, Category, ProductCategory, OrderProduct, Order
+from configuration import Configuration
+from models import database, Product, Category, ProductCategory, OrderProduct, Order
+
+# from store.configuration import Configuration
+# from store.models import database, Product, Category, ProductCategory, OrderProduct, Order
 
 application = Flask(__name__)
 application.config.from_object(Configuration)

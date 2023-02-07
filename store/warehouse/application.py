@@ -1,12 +1,16 @@
 import json
 
 from flask import Flask, request, Response
+from flask_jwt_extended import JWTManager, jwt_required
 from redis.client import Redis
 
-from store.models import database
-from store.admin.adminDecorator import roleCheck
-from store.configuration import Configuration
-from flask_jwt_extended import JWTManager, jwt_required
+from models import database
+from roleDecorator import roleCheck
+from configuration import Configuration
+
+# from store.models import database
+# from store.roleDecorator import roleCheck
+# from store.configuration import Configuration
 
 import io
 import csv
@@ -75,7 +79,7 @@ def updateStore():
 @jwt_required()
 @roleCheck("warehouse")
 def index():
-    return "RADI!"
+    return "warehouse RADI!"
 
 
 if __name__ == "__main__":

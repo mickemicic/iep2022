@@ -7,8 +7,8 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, cr
 from sqlalchemy import and_
 
 from configuration import Configuration
-from models import database, User, UserRole
-from store.admin.adminDecorator import roleCheck
+from models import database, User, UserRole, Role
+from roleDecorator import roleCheck
 
 application = Flask(__name__)
 application.config.from_object(Configuration)
@@ -65,9 +65,11 @@ def register():
 
     # userRole = UserRole(userId=user.id, roleId=int(isCustomer)+2)
     if isCustomer:
-        roleId = 3
+        role = Role.query.filter(Role.name == "customer").first()
     else:
-        roleId = 2
+        role = Role.query.filter(Role.name == "warehouse").first()
+
+    roleId = role.id
     userRole = UserRole(userId=user.id, roleId=roleId)
     database.session.add(userRole)
     database.session.commit()

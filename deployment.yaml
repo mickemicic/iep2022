@@ -1,0 +1,149 @@
+version: '3'
+
+services:
+  authenticationDB:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+#    ports:
+#      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+    volumes:
+      - authenticationVolume:/var/lib/mysql
+    networks:
+      - authenticationNetwork
+
+  authenticationDBMigration:
+    image: authdbmigration
+    environment:
+      - DATABASE_URL=authenticationDB
+    depends_on:
+      authenticationDB:
+        condition: service_healthy
+    networks:
+      - authenticationNetwork
+
+  authentication:
+    image: authentication_new
+    environment:
+      - DATABASE_URL=authenticationDB
+    depends_on:
+      - authenticationDBMigration
+    ports:
+      - "5002:5002"
+    networks:
+      - authenticationNetwork
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - authenticationNetwork
+      - storeNetwork
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - daemonNetworkX
+      - warehouseNetwork
+
+  storeDatabase:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - DATABASE_URL=storeDatabase
+      - REDIS_URL=redis
+#    ports:
+#      - "3306:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
+    volumes:
+      - storeVolume:/var/lib/mysql
+    networks:
+      - adminNetwork
+      - customerNetwork
+      - warehouseNetwork
+      - daemonNetwork
+      - storeNetwork
+
+  storeDBMigration:
+    image: storedbmigration
+    environment:
+      - REDIS_URL=redis
+      - DATABASE_URL=storeDatabase
+    depends_on:
+      storeDatabase:
+          condition: service_healthy
+    networks:
+      - storeNetwork
+
+  admin:
+    image: admin_image
+    environment:
+      - REDIS_URL=redis
+      - DATABASE_URL=storeDatabase
+    depends_on:
+      - storeDBMigration
+    ports:
+      - "5005:5005"
+    networks:
+      - adminNetwork
+
+  customer:
+    image: customer_image
+    environment:
+      - REDIS_URL=redis
+      - DATABASE_URL=storeDatabase
+    depends_on:
+      - storeDBMigration
+    ports:
+      - "5004:5004"
+    networks:
+      - customerNetwork
+
+  warehouse:
+    image: warehouse_image
+    environment:
+      - REDIS_URL=redis
+      - DATABASE_URL=storeDatabase
+    depends_on:
+      - storeDBMigration
+    ports:
+      - "5003:5003"
+    networks:
+      - warehouseNetwork
+
+  daemon:
+    image: daemon_image
+    environment:
+      - REDIS_URL=redis
+      - DATABASE_URL=storeDatabase
+    depends_on:
+      - storeDBMigration
+    networks:
+      - daemonNetwork
+      - daemonNetworkX
+
+
+volumes:
+  authenticationVolume:
+  storeVolume:
+
+networks:
+  authenticationNetwork:
+  storeNetwork:
+
+  adminNetwork:
+  warehouseNetwork:
+  customerNetwork:
+
+  daemonNetwork:
+  daemonNetworkX:

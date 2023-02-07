@@ -1,3 +1,11 @@
-http://192.168.0.15:8080/
-baza autentikacija: 	database, root/root
+# http://192.168.0.15:8080/
+sad je sve na localhost
+
+baza autentikacija: 	authentication DB, root/root
 baza prodavnica:	storeDatabase, root/root
+
+python main.py --with-authentication --authentication-address http://localhost:5002 --customer-address http://localhost:5004 --warehouse-address http://localhost:5003 --jwt-secret JWT_SECRET_KEY --roles-field roles --administrator-role admin --customer-role customer --wareh
+ouse-role warehouse --type all --administrator-address http://localhost:5005
+
+obrisi sve iz redisa (lpop products) + porudzbine + korisnike ako si pokretao testove
+

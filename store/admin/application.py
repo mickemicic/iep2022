@@ -1,10 +1,17 @@
-from flask import Flask, request, jsonify
+# import sys
+
+# sys.path.append('store')
+
+from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager, jwt_required
 from sqlalchemy import func
+# from store.roleDecorator import roleCheck
+# from store.configuration import Configuration
+# from store.models import database, Product, Category, OrderProduct, ProductCategory
 
-from store.admin.adminDecorator import roleCheck
-from store.configuration import Configuration
-from store.models import database, Product, Category, OrderProduct, ProductCategory
+from roleDecorator import roleCheck
+from configuration import Configuration
+from models import database, Product, Category, OrderProduct, ProductCategory
 
 application = Flask(__name__)
 application.config.from_object(Configuration)
